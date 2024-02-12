@@ -1,0 +1,148 @@
+﻿@page "/supplier/form"
+@layout EmptyLayout
+@attribute [Authorize]
+
+<div style="margin-bottom:2em">
+    <img src="images/Urban-Sense-Logo.png" width="100" />
+</div>
+<h2>Leveranciers: registratie formulier</h2>
+
+@*<RadzenTemplateForm>
+*@
+<div class="row">
+    <RadzenFieldset Text="formulier" Style="width:750px">
+        <div class="row" style="margin-bottom:1rem;">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="Leverancierstype" />
+            </div>
+            <div class="col-md-8">
+                <RadzenDropDown Name="Leverancierstype"
+                                AllowClear="true"
+                                TValue="string"
+                                AllowVirtualization="true"
+                                Style="width:100%"
+                                LoadData=@LoadDataVirtualization
+                                AllowFiltering="true"
+                                Count="@count"
+                                Data=@factsList
+                                Change=@(args => OnChange(args)) />
+                <RadzenRequiredValidator Component="Leverancierstype" Text="Type is verplicht" />
+            </div>
+        </div>
+        <div class="row" style="margin-bottom:1rem;">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="Leverancier" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox Style="width:100%" Name="Description" />
+                <RadzenRequiredValidator Component="Description" Text="Omschrijving is verplicht" />
+            </div>
+        </div>
+        <div class="row" style="margin-bottom:1rem;">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="Contactpersoon" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox Style="width:100%" Name="Description" />
+            </div>
+        </div>
+        <div class="row" style="margin-bottom:1rem;">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="Telefoon" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox Style="width:100%" Name="Description" />
+            </div>
+        </div>
+        <div class="row" style="margin-bottom:1rem;">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="Email" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox Style="width:100%" Name="Description" />
+            </div>
+        </div>
+        <div class="row" style="margin-bottom:1rem;">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="Homepagina" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextBox Style="width:100%" Name="URL" />
+            </div>
+        </div>
+        <div class="row" style="margin-bottom:1rem;">
+            <div class="col-md-4 align-items-center d-flex">
+                <RadzenLabel Text="Opmerkingen" />
+            </div>
+            <div class="col-md-8">
+                <RadzenTextArea Style="width:100%" Name="Remarks" />
+            </div>
+        </div>
+        <div style="text-align:left; width:100%">
+            <p>To do: Recaptcha</p>
+            <AcceptPrivacyStatement @bind-Accept="@acceptPrivacyStatement" />
+            <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Verzenden" />
+        </div>
+    </RadzenFieldset>
+</div>
+@*
+    </RadzenTemplateForm>*@
+
+@code {
+
+
+    int count;
+    int pageSize;
+    IEnumerable<string> factsList;
+
+    bool acceptPrivacyStatement;
+
+    private async Task LoadDataVirtualization(LoadDataArgs args)
+    {
+        try
+        {
+            count = 0;
+            pageSize = 0;
+            factsList = null;
+        }
+        catch (Exception)
+        {
+            factsList = Enumerable.Empty<string>().ToList();
+        }
+    }
+
+    private string GetFactDropDownValue(string key, string factTypeName)
+    {
+        return $"";
+    }
+
+    private async Task Submit()
+    {
+        try
+        {
+            if (!acceptPrivacyStatement)
+            {
+
+            }
+            else
+            {
+
+            }
+        }
+        catch (Exception ex)
+        {
+            EmptyForm();
+            string errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Oeps! Er is iets fout gegaan." : ex.Message;
+            NotificationService.Notify(NotificationSeverity.Error, "Error", errorMessage);
+        }
+    }
+
+    private void OnChange(object fact)
+    {
+
+    }
+
+    private void EmptyForm()
+    {
+    }
+}

@@ -1,0 +1,232 @@
+﻿@page "/datasets/details"
+@page "/datasets/details/{Identifier}"
+@attribute [Authorize]
+
+<div style="margin-bottom:2em">
+    <RadzenLink Path="@Config.Value.PortalUri" Text="Portaal" target="_self" />/<RadzenLink Path="/" Text="Data catalog" target="_self" />/ Dataset @Identifier
+</div>
+
+<h3>Details van dataset: @Identifier</h3>
+
+<AuthorizeView Context="Auth" Roles=@($"{Roles.Admin},{Roles.SuperAdmin},{Roles.Writer}")>
+    <RadzenButton ButtonStyle="ButtonStyle.Secondary"
+                  Text="Dataset aanpassen"
+                  Icon="edit"
+                  Click="@(args => NavigateToEdit(dataSet.Identifier))"
+                  Style="margin-top:2rem;" />
+</AuthorizeView>
+<AuthorizeView Context="Auth" Roles=@($"{Roles.Admin},{Roles.SuperAdmin}")>
+    <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                  Text="Dataset verwijderen"
+                  Icon="delete"
+                  Click="@(args => DeleteDialog(dataSet))"
+                  Style="margin-top:2rem;" />
+</AuthorizeView>
+
+<div style="text-align: right; width:100%">
+    <RadzenLink Path="/datasets" Text="Terug naar datasets" Style="margin: 0 1rem 1rem 0" />
+</div>
+
+<RadzenTemplateForm Data="@dataSet">
+    <FormGeneralDataSet isNewDataSet="false"
+                        isEdit="false"
+                        dataSet="@dataSet"
+                        contactPoint="@contactPoint"
+                        publisher="@publisher"
+                        creator="@creator"
+                        keywordsList="@null"
+                        themesList="@null"
+                        keywords="@keywords"
+                        themes="@themes" />
+</RadzenTemplateForm>
+
+<h5 style="margin-top:2rem">Distributie</h5>
+<div class="row" style="justify-content:flex-end">
+    <div class="m-3">
+        <RadzenTextBox Placeholder="Zoeken..." Change=@(args=> OnDistributionSearch(args)) />
+    </div>
+</div>
+<RadzenDataGrid Data="@distributions"
+                @ref="distributionGrid"
+                Count="@distributionCount"
+                LoadData="@LoadDistributionData"
+                AllowSorting="true"
+                AllowFiltering="false"
+                AllowPaging="true"
+                PageSizeOptions="@distributionPageSizeOptions"
+                TItem="Distribution"
+                ColumnWidth="200px">
+    <Columns>
+        <RadzenDataGridColumn TItem="Distribution" Property="Title" Title="Titel">
+            <FooterTemplate>
+                <FooterCount PageSize="distributionPageSize" Count="distributionCount" Grid="distributionGrid" TItem="Distribution" />
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Distribution" Property="Description" Title="Omschrijving" />
+        <RadzenDataGridColumn TItem="Distribution" Property="AccessURL" Title="URL" />
+        <RadzenDataGridColumn TItem="Distribution" Property="Format" Title="Format" />
+        <RadzenDataGridColumn TItem="Distribution" Property="MediaType" Title="Media type" />
+    </Columns>
+</RadzenDataGrid>
+
+<h5 style="margin-top:2rem">Rollen</h5>
+<div class="row" style="justify-content:flex-end">
+    <div class="m-3">
+        <RadzenTextBox Placeholder="Zoeken..." Change=@(args=> OnRolesSearch(args)) />
+    </div>
+</div>
+<RadzenDataGrid Data="@roles"
+                @ref="rolesGrid"
+                Count="@rolesCount"
+                LoadData="@LoadRolesData"
+                AllowSorting="true"
+                AllowFiltering="false"
+                AllowPaging="true"
+                PageSizeOptions="@rolesPageSizeOptions"
+                TItem="Role"
+                ColumnWidth="200px">
+    <Columns>
+        <RadzenDataGridColumn TItem="Role" Property="Name" Title="Naam">
+            <FooterTemplate>
+                <FooterCount Grid="rolesGrid" Count="rolesCount" PageSize="rolesPageSize" TItem="Role" />
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Role" Property="Description" Title="Omschrijving" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Inject]
+    private IDataCatalogServiceClient DataCatalogServiceClient { get; set; }
+
+    [Parameter]
+    public string Identifier { get; set; }
+
+    LinkedDataSet dataSet = new LinkedDataSet();
+    Organization publisher = new Organization();
+    ContactPoint contactPoint = new ContactPoint();
+    Organization creator = new Organization();
+    List<string> keywords = new List<string>();
+    List<string> themes = new List<string>();
+
+    //distribution grid
+    IEnumerable<Distribution> distributions;
+    RadzenDataGrid<Distribution> distributionGrid;
+    LoadDataArgs distributionDataArgs;
+    IEnumerable<int> distributionPageSizeOptions = new int[] { 5, 10, 25, 50 };
+    int distributionCount;
+    int distributionPageSize;
+
+    //roles grid
+    IEnumerable<Role> roles;
+    RadzenDataGrid<Role> rolesGrid;
+    private List<string> rolesList { get; set; }
+    LoadDataArgs rolesDataArgs;
+    IEnumerable<int> rolesPageSizeOptions = new int[] { 5, 10, 25, 50 };
+    int rolesCount;
+    int rolesPageSize;
+
+
+    async Task LoadDistributionData(LoadDataArgs args)
+    {
+        try
+        {
+            dataSet = await DataCatalogServiceClient.GetDataSetAsync(Identifier);
+            distributions = dataSet.Distribution;
+            publisher = dataSet.Publisher ?? new Organization();
+            creator = dataSet.Creator ?? new Organization();
+            contactPoint = dataSet.ContactPoint ?? new ContactPoint();
+            keywords = dataSet.Keyword ?? new List<string>();
+            themes = dataSet.Theme ?? new List<string>();
+            distributionCount = distributions.Count();
+            distributionPageSize = args.Top.Value;
+        }
+        catch (Exception ex)
+        {
+            distributions = Enumerable.Empty<Distribution>();
+        }
+    }
+
+    async Task LoadRolesData(LoadDataArgs args)
+    {
+        try
+        {
+            var roleParameters = new RoleParameters
+            {
+                PageIndex = rolesGrid.CurrentPage,
+                PageSize = args.Top.Value,
+                Sorting = args.OrderBy ?? string.Empty,
+                Search = args.Filter
+            };
+            var query = await DataCatalogServiceClient.GetDataSetRolesAsync(Identifier, roleParameters);
+            roles = query.Items.ToList();
+            rolesCount = query.Count;
+            rolesPageSize = args.Top.Value;
+        }
+        catch (Exception ex)
+        {
+            roles = Enumerable.Empty<Role>();
+        }
+    }
+
+    private async void OnDistributionSearch(string search)
+    {
+        distributionDataArgs = new LoadDataArgs
+        {
+            Skip = distributionGrid.Query.Skip,
+            Top = distributionGrid.Query.Top,
+            Filter = search,
+            OrderBy = distributionGrid.Query.OrderBy
+        };
+        await LoadDistributionData(distributionDataArgs);
+    }
+
+    private async void OnRolesSearch(string search)
+    {
+        rolesDataArgs = new LoadDataArgs
+        {
+            Skip = distributionGrid.Query.Skip,
+            Top = distributionGrid.Query.Top,
+            Filter = search,
+            OrderBy = distributionGrid.Query.OrderBy
+        };
+        await LoadRolesData(rolesDataArgs);
+    }
+
+    private void NavigateToEdit(string identifier)
+    {
+        NavigationManager.NavigateTo($"/datasets/edit/{identifier}");
+    }
+
+    private async Task DeleteDialog(DataSet dataSet)
+    {
+        await DialogService.OpenAsync("Bevistigen", deleteDialog =>
+    @<div style="text-align:center;">
+        <p>Bent u zeker om dataset <strong>@dataSet.Identifier</strong> te verwijderen ?</p>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenButton Text="Ok" Click="() =>DeleteFactAsync(dataSet, deleteDialog)" Style="margin-bottom: 10px; width: 150px" />
+                <RadzenButton Text="Cancel" Click="() => deleteDialog.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+            </div>
+        </div>
+    </div>
+    );
+    }
+
+    private async Task DeleteFactAsync(DataSet dataSet, DialogService dialog)
+    {
+        try
+        {
+            await DataCatalogServiceClient.DeleteDataSetAsync(dataSet.Identifier);
+            dialog.Close();
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Succes", Detail = "Dataset werd succesvol verwijderd." });
+            NavigationManager.NavigateTo("/datasets");
+        }
+        catch (Exception ex)
+        {
+            dialog.Close();
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "Oeps! Er is iets fout gegaan" });
+        }
+    }
+
+}

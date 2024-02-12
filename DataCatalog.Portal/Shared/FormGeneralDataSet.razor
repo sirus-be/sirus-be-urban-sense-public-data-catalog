@@ -1,0 +1,631 @@
+﻿<div class="row m-1">
+    <div class="col-md-6">
+        <RadzenFieldset Text="Algemeen" Style="width:100%">
+            <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet)"></DescriptionLabel>
+            @if (isNewDataSet)
+            {
+                <div class="row" style="margin-bottom:1rem">
+                    <div class="col-md-4 align-items-center d-flex">
+                        <RadzenLabel Text="Identifier" />
+                    </div>
+                    <div class="col-md-8">
+                        @if (isEdit)
+                        {
+                            <RadzenTextBox Style="width:100%" Name="Identifier" @bind-Value="dataSet.Identifier" />
+                            <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Identifier)"></DescriptionLabel>
+                            <RadzenRequiredValidator Component="Identifier" Text="Identifier is verplicht" />
+                        }
+                        else
+                        {
+                            <b>@dataSet.Identifier</b>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Title" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Title" @bind-Value="dataSet.Title" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Title)"></DescriptionLabel>
+                        <RadzenRequiredValidator Component="Title" Text="Title is verplicht" />
+                    }
+                    else
+                    {
+                        <b>@dataSet.Title</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Description" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Description" @bind-Value="dataSet.Description" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Description)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Description</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Rights" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Rights" @bind-Value="dataSet.Rights" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Rights)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Rights</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Issued" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Issued" @bind-Value="dataSet.Issued" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Issued)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Issued</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Modified" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Modified" @bind-Value="dataSet.Modified" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Modified)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Modified</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Frequency" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Frequency" @bind-Value="dataSet.AccrualPeriodicity" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.AccrualPeriodicity)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.AccrualPeriodicity</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Spatial" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Spatial" @bind-Value="dataSet.Spatial" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Spatial)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Spatial</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="TemporalResolution" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="TemporalResolution" @bind-Value="dataSet.TemporalResolution" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.TemporalResolution)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.TemporalResolution</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="LandingsPage" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="LandingsPage" @bind-Value="dataSet.LandingsPage" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.LandingsPage)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.LandingsPage</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Contains personal data" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenSwitch Name="ContainsPersonalData" @bind-Value="dataSet.ContainsPersonalData" />
+                        <div>
+                            <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.ContainsPersonalData)"></DescriptionLabel>
+                        </div>
+                    }
+                    else
+                    {
+                        @if (dataSet.ContainsPersonalData)
+                        {
+                            <RadzenIcon Icon="check" />
+                        }
+                        else
+                        {
+                            <RadzenIcon Icon="close" />
+                        }
+                    }
+                </div>
+            </div>
+        </RadzenFieldset>
+    </div>
+    <div class="col-md-6">
+        <RadzenFieldset Text="Algemeen" Style="width:100%">
+            <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet)"></DescriptionLabel>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="AccessRights" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="AccessRights" @bind-Value="dataSet.AccessRights" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.AccessRights)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.AccessRights</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="ConformsTo" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="ConformsTo" @bind-Value="dataSet.ConformsTo" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.ConformsTo)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.ConformsTo</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Language" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Language" @bind-Value="dataSet.Language" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Language)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Language</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="License" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="License" @bind-Value="dataSet.License" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.License)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.License</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="IsReferencedBy" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="IsReferencedBy" @bind-Value="dataSet.IsReferencedBy" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.IsReferencedBy)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.IsReferencedBy</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Replaces" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Replaces" @bind-Value="dataSet.Replaces" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Replaces)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Replaces</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Version" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Version" @bind-Value="dataSet.Version" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Version)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Version</b>
+                    }
+                </div>
+            </div>
+            <div class="row" style="margin-bottom:1rem">
+                <div class="col-md-4 align-items-center d-flex">
+                    <RadzenLabel Text="Status" />
+                </div>
+                <div class="col-md-8">
+                    @if (isEdit)
+                    {
+                        <RadzenTextBox Style="width:100%" Name="Status" @bind-Value="dataSet.Status" />
+                        <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Status)"></DescriptionLabel>
+                    }
+                    else
+                    {
+                        <b>@dataSet.Status</b>
+                    }
+                </div>
+            </div>
+        </RadzenFieldset>
+    </div>
+</div>
+<div class="row m-1">
+    <div class="col-md-6">
+        <RadzenTemplateForm Data="@publisher" Style="height:auto">
+            <div class="row m-1">
+                <RadzenFieldset Text="Publisher" Style="width:100%">
+                    <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Publisher)"></DescriptionLabel>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Name" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <RadzenTextBox Style="width:100%" Name="PublisherName" @bind-Value="publisher.Name" />
+                                <DescriptionLabel TItem="Organization" aspfor="@nameof(Organization.Name)"></DescriptionLabel>
+                            }
+                            else
+                            {
+                                <b>@publisher.Name</b>
+                            }
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Homepage" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <RadzenTextBox Style="width:100%" Name="PublisherHomepage" @bind-Value="publisher.Homepage" />
+                                <DescriptionLabel TItem="Organization" aspfor="@nameof(Organization.Homepage)"></DescriptionLabel>
+                            }
+                            else
+                            {
+                                <b>@publisher.Homepage</b>
+                            }
+                        </div>
+                    </div>
+                </RadzenFieldset>
+            </div>
+        </RadzenTemplateForm>
+        <RadzenTemplateForm Data="@creator" Style="height:auto">
+            <div class="row m-1">
+                <RadzenFieldset Text="Creator" Style="width:100%">
+                    <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Creator)"></DescriptionLabel>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Name" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <RadzenTextBox Style="width:100%" Name="CreatorName" @bind-Value="creator.Name" />
+                                <DescriptionLabel TItem="Organization" aspfor="@nameof(Organization.Name)"></DescriptionLabel>
+                            }
+                            else
+                            {
+                                <b>@creator.Name</b>
+                            }
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Homepage" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <RadzenTextBox Style="width:100%" Name="CreatorHomepage" @bind-Value="creator.Homepage" />
+                                <DescriptionLabel TItem="Organization" aspfor="@nameof(Organization.Homepage)"></DescriptionLabel>
+                            }
+                            else
+                            {
+                                <b>@creator.Homepage</b>
+                            }
+                        </div>
+                    </div>
+                </RadzenFieldset>
+            </div>
+        </RadzenTemplateForm>
+    </div>
+    <div class="col-md-6">
+        <RadzenTemplateForm Data="@contactPoint" Style="height:auto">
+            <div class="row m-1">
+                <RadzenFieldset Text="Contact Point" Style="width:100%">
+                    <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.ContactPoint)"></DescriptionLabel>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Name" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <RadzenTextBox Style="width:100%" Name="FN" @bind-Value="@contactPoint.Fn" />
+                                <DescriptionLabel TItem="ContactPoint" aspfor="@nameof(ContactPoint.Fn)"></DescriptionLabel>
+                            }
+                            else
+                            {
+                                <b>@contactPoint.Fn</b>
+                            }
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Email" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <RadzenTextBox Style="width:100%" Name="Email" @bind-Value="@contactPoint.HasEmail" />
+                                <DescriptionLabel TItem="ContactPoint" aspfor="@nameof(ContactPoint.HasEmail)"></DescriptionLabel>
+                            }
+                            else
+                            {
+                                <b>@contactPoint.HasEmail</b>
+                            }
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Telephone" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <RadzenTextBox Style="width:100%" Name="Email" @bind-Value="@contactPoint.HasTelephone" />
+                                <DescriptionLabel TItem="ContactPoint" aspfor="@nameof(ContactPoint.HasTelephone)"></DescriptionLabel>
+                            }
+                            else
+                            {
+                                <b>@contactPoint.HasTelephone</b>
+                            }
+                        </div>
+                    </div>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Language" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <RadzenTextBox Style="width:100%" Name="Email" @bind-Value="@contactPoint.Language" />
+                                <DescriptionLabel TItem="ContactPoint" aspfor="@nameof(ContactPoint.Language)"></DescriptionLabel>
+                            }
+                            else
+                            {
+                                <b>@contactPoint.Language</b>
+                            }
+                        </div>
+                    </div>
+                </RadzenFieldset>
+            </div>
+        </RadzenTemplateForm>
+    </div>
+</div>
+<div class="row m-1">
+    <div class="col-md-6">
+        <RadzenTemplateForm Data="@themesList" Style="height:auto">
+            <div class="row m-1">
+                <RadzenFieldset Text="Theme" Style="width:100%">
+                    <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Theme)"></DescriptionLabel>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Themes" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <div style="width:100%; margin-bottom:0.25rem; display:flex; justify-content: flex-end">
+                                    <RadzenTextBox Name="Theme" @bind-Value="@addedTheme" Style="width:100%" />
+                                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="add" Click=" args => AddTheme(args)" Style="margin-left:0.25rem" />
+                                </div>
+                            }
+
+                            @if (themes != null)
+                            {
+                                foreach (var theme in themes)
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" Style="margin-top:0.25rem; margin-bottom:0.25rem;">
+                                        <RadzenLabel Text="@theme" />
+                                        @if (isEdit)
+                                        {
+                                            <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="close" Size="ButtonSize.Small" Click="() => RemoveTheme(theme)" />
+                                        }
+                                    </RadzenBadge>
+                                }
+                            }
+                            @if (isEdit)
+                            {
+                                <div><DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Theme)"></DescriptionLabel></div>
+                            }
+                        </div>
+                    </div>
+                </RadzenFieldset>
+            </div>
+        </RadzenTemplateForm>
+    </div>
+    <div class="col-md-6">
+        <RadzenTemplateForm Data="@keywordsList" Style="height:auto">
+            <div class="row m-1">
+                <RadzenFieldset Text="Keywords" Style="width:100%">
+                    <DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Keyword)"></DescriptionLabel>
+                    <div class="row" style="margin-bottom:1rem">
+                        <div class="col-md-4 align-items-center d-flex">
+                            <RadzenLabel Text="Keywords" />
+                        </div>
+                        <div class="col-md-8">
+                            @if (isEdit)
+                            {
+                                <div style="width:100%; margin-bottom:0.25rem; display:flex; justify-content: flex-end">
+                                    <RadzenTextBox Name="Keyword" @bind-Value="@addedKeyword" Style="width:100%" />
+                                    <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="add" Click=" args => AddKeyword(args)" Style="margin-left:0.25rem" />
+                                </div>
+                            }
+
+                            @if (keywords != null)
+                            {
+                                foreach (var keyword in keywords)
+                                {
+                                    <RadzenBadge BadgeStyle="BadgeStyle.Primary" Style="margin-top:0.25rem; margin-bottom:0.25rem;">
+                                        <RadzenLabel Text="@keyword" />
+                                        @if (isEdit)
+                                        {
+                                            <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="close" Size="ButtonSize.Small" Click="() => RemoveKeyword(keyword)" />
+                                        }
+                                    </RadzenBadge>
+                                }
+                            }
+                            @if (isEdit)
+                            {
+                                <div><DescriptionLabel TItem="DataSet" aspfor="@nameof(DataSet.Keyword)"></DescriptionLabel></div>
+                            }
+                        </div>
+                    </div>
+                </RadzenFieldset>
+            </div>
+        </RadzenTemplateForm>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public bool isNewDataSet { get; set; }
+
+    [Parameter]
+    public bool isEdit { get; set; }
+
+    [Parameter]
+    public LinkedDataSet dataSet { get; set; }
+
+    [Parameter]
+    public ContactPoint contactPoint { get; set; }
+
+    [Parameter]
+    public Organization publisher { get; set; }
+
+    [Parameter]
+    public Organization creator { get; set; }
+
+    [Parameter]
+    public string keywordsList { get; set; }
+
+    [Parameter]
+    public string themesList { get; set; }
+
+    [Parameter]
+    public List<string> keywords { get; set; } = new List<string>();
+
+    [Parameter]
+    public List<string> themes { get; set; } = new List<string>();
+
+    string addedTheme;
+    string addedKeyword;
+
+    private void AddTheme(object theme)
+    {
+        if (!string.IsNullOrEmpty(addedTheme))
+        {
+            themes.Add(addedTheme);
+            addedTheme = string.Empty;
+        }
+    }
+
+    private void RemoveTheme(string theme)
+    {
+        themes.Remove(theme);
+    }
+
+    private void AddKeyword(object keyword)
+    {
+        if (!string.IsNullOrEmpty(addedKeyword))
+        {
+            keywords.Add(addedKeyword);
+            addedKeyword = string.Empty;
+        }
+    }
+
+    private void RemoveKeyword(string keyword)
+    {
+        keywords.Remove(keyword);
+    }
+}

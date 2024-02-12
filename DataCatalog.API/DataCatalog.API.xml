@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DataCatalog.API</name>
+    </assembly>
+    <members>
+        <member name="M:DataCatalog.API.Controllers.v1.CachedDataSetController.GetDataSetDistribution(System.String,System.String)">
+            <summary>
+            Returns a specific dataset distribution
+            </summary>
+            <param name="id">The dataset's id</param>
+            <param name="distributionTitle">The distribution's title</param>
+            <returns></returns>   
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.DataSetController.GetAll(DataCatalog.Models.Parameters.DataSetParameters)">
+            <summary>
+            Returns all datasets as json-ld in the database
+            </summary>
+            <param name="dataSetParameters">Parameters for sorting, paging, filtering,...</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.DataSetController.GetById(System.String)">
+            <summary>
+            Get one dataset as json-ld by id from the database
+            </summary>
+            <param name="id">The dataset's ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.DataSetController.GetDataSetDistribution(System.String,System.String)">
+            <summary>
+            Returns a specific dataset distribution
+            </summary>
+            <param name="id">The dataset's id</param>
+            <param name="distributionTitle">The distribution's title</param>
+            <returns></returns>   
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.DataSetController.Create(DataCatalog.Models.LinkedDataSet)">
+            <summary>
+            Insert one dataset in the database
+            </summary>
+            <param name="dataSet">The create dataset</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.DataSetController.Update(DataCatalog.Models.LinkedDataSet)">
+            <summary>
+            Update a dataset from the database
+            </summary>
+            <param name="id">The dataset's ID</param>
+            <param name="dataSet">The update dataset</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.DataSetController.Delete(System.String)">
+            <summary>
+            Delete a dataset from the database
+            </summary>
+            <param name="id">The datasets's ID</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.RoleController.GetAll(DataCatalog.Models.Parameters.RoleParameters)">
+            <summary>
+            Returns all roles
+            </summary>
+            <param name="roleParameters">Parameters for sorting, paging, filtering,...</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.RoleController.GetAllDataSetRoles(System.String,DataCatalog.Models.Parameters.RoleParameters)">
+            <summary>
+            Return all data sets roles
+            </summary>
+            <param name="dataSetName">Dataset's name</param>
+            <param name="roleParameters">Parameters for sorting, paging, filtering,...</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.RoleController.GetByName(System.String)">
+            <summary>
+            Get one role by id
+            </summary>
+            <param name="id">The role's Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.RoleController.Create(DataCatalog.Models.Role)">
+            <summary>
+            Insert one role in the database
+            </summary>
+            <param name="role">The create role</param>
+            <returns></returns>
+        </member>
+        <member name="M:DataCatalog.API.Controllers.v1.RoleController.Update(DataCatalog.Models.Data.UpdateRole)">
+            <summary>
+            Update a role from the database
+            </summary>
+            <param name="role">The update role</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

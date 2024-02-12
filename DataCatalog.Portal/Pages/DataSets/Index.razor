@@ -1,0 +1,160 @@
+﻿@page "/datasets"
+@attribute [Authorize]
+
+<div style="margin-bottom:2em">
+    <RadzenLink Path="@Config.Value.PortalUri" Text="Portaal" target="_self" />/<RadzenLink Path="/" Text="Data catalog" target="_self" />/ Datasets
+</div>
+
+<h3>Datasets</h3>
+
+<p>De Data Catalog volgt de <RadzenLink Path="https://www.w3.org/TR/vocab-dcat-3" Text="Data Catalog Vocabulary (DCAT) - Version 3"/> specificaties.</p>
+<p><RadzenLink Path="https://dublincore.org/specifications/dublin-core/dcmi-terms/" Text="Terms" /></p>
+
+<div class="row" style="display:flex; justify-content: space-between">
+    <div class="m-3">
+        <RadzenButton Click="@CreateDataSet"
+                      Text="Dataset aanmaken"
+                      ButtonStyle="ButtonStyle.Secondary"
+                      Style="margin: 0 1rem 1rem 0"></RadzenButton>
+    </div>
+    <div class="m-3">
+        <RadzenTextBox Placeholder="Zoeken..." Change=@(args => OnDataSetsSearch(args)) />
+    </div>
+</div>
+
+<RadzenDataGrid @ref="grid"
+                Count="@count"
+                Data="@dataSets"
+                LoadData="@LoadData"
+                TItem="DataSet"
+                AllowSorting="true"
+                AllowFiltering="false"
+                AllowPaging="true"
+                PageSizeOptions="@pageSizeOptions"
+                ColumnWidth="200px"
+                @bind-Value="@selectedDataSet"
+                @onclick="@Navigate">
+    <Columns>
+        <RadzenDataGridColumn TItem="DataSet" Property="Identifier" Title="Identifier">
+            <FooterTemplate>
+                <FooterCount Count="count" Grid="grid" PageSize="pageSize" TItem="DataSet" />
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="DataSet" Property="Title" Title="Titel" />
+        <RadzenDataGridColumn TItem="DataSet" Property="Description" Title="Omschrijving" />
+        <AuthorizeView Roles="@($"{Roles.Admin},{Roles.SuperAdmin},{Roles.Writer}")">
+            <RadzenDataGridColumn TItem="DataSet" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="45px">
+                <Template Context="dataSet">
+                    <RadzenButton ButtonStyle="ButtonStyle.Secondary" Icon="edit" Size="ButtonSize.Medium" Click="@(args => EditDataSet(dataSet))" @onclick:stopPropagation="true" />
+                </Template>
+            </RadzenDataGridColumn>
+        </AuthorizeView>
+        <AuthorizeView Roles="@($"{Roles.Admin},{Roles.SuperAdmin}")">
+            <RadzenDataGridColumn TItem="DataSet" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="45px">
+                <Template Context="dataSet">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium" Click="@(args => DeleteDialog(dataSet))" @onclick:stopPropagation="true" />
+                </Template>
+            </RadzenDataGridColumn>
+        </AuthorizeView>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Inject]
+    private IDataCatalogServiceClient DataCatalogServiceClient { get; set; }
+    IEnumerable<int> pageSizeOptions = new int[] { 5, 10, 25, 50 };
+    RadzenDataGrid<DataSet> grid;
+    int count;
+    IEnumerable<DataSet> dataSets;
+    DataSetParameters parameters;
+    int pageSize;
+    IList<DataSet> selectedDataSet;
+    LoadDataArgs rolesArgs { get; set; }
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        try
+        {
+            parameters = new DataSetParameters
+            {
+                PageIndex = grid.CurrentPage,
+                PageSize = args.Top.Value,
+                Sorting = args.OrderBy ?? string.Empty,
+                Search = args.Filter
+            };
+
+            var query = await DataCatalogServiceClient.GetDataSetsAsync(parameters);
+            var result = query.AsQueryable();
+            pageSize = args.Top.Value;
+            count = query.Count;
+            dataSets = result;
+        }
+        catch (Exception ex)
+        {
+            dataSets = Enumerable.Empty<DataSet>();
+        }
+    }
+
+    private void CreateDataSet()
+    {
+        NavigationManager.NavigateTo("/datasets/create");
+    }
+
+    private async Task OnDataSetsSearch(string search)
+    {
+        rolesArgs = new LoadDataArgs
+        {
+            Skip = grid.Query.Skip,
+            Top = grid.Query.Top,
+            Filter = search,
+            OrderBy = grid.Query.OrderBy
+        };
+
+        await LoadData(rolesArgs);
+    }
+
+    private void Navigate()
+    {
+        if (selectedDataSet != null)
+        {
+            NavigationManager.NavigateTo($"/datasets/details/{selectedDataSet.First().Identifier}");
+            selectedDataSet.Clear();
+        }
+    }
+
+    private async Task DeleteDialog(DataSet dataSet)
+    {
+        await DialogService.OpenAsync("Bevistigen", deleteDialog =>
+    @<div style="text-align:center;">
+        <p>Bent u zeker om dataset <strong>@dataSet.Identifier</strong> te verwijderen ?</p>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenButton Text="Ok" Click="() =>DeleteDataSetAsync(dataSet, deleteDialog)" Style="margin-bottom: 10px; width: 150px" />
+                <RadzenButton Text="Cancel" Click="() => deleteDialog.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+            </div>
+        </div>
+    </div>
+    );
+    }
+
+    private async Task DeleteDataSetAsync(DataSet dataSet, DialogService dialog)
+    {
+        try
+        {
+            await DataCatalogServiceClient.DeleteDataSetAsync(dataSet.Identifier);
+            dialog.Close();
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Succes", Detail = "Dataset werd succesvol verwijderd." });
+            await grid.Reload();
+        }
+        catch (Exception ex)
+        {
+            dialog.Close();
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "Oeps! Er is iets fout gegaan." });
+        }
+    }
+
+    private void EditDataSet(DataSet dataSet)
+    {
+        NavigationManager.NavigateTo($"/datasets/edit/{dataSet.Identifier}");
+    }
+}

@@ -1,0 +1,25 @@
+﻿<div>
+    Ik ga akkoord met het privacy beleid
+    <RadzenLink Path="/privacyverklaring" Text="(klikken voor details)" target="_blank" />
+    <RadzenCheckBox @bind-Value=@Accept Name="PrivacyStatement" TValue="bool" />
+</div>    
+
+@code {
+    private bool _value;
+
+    [Parameter]
+    public bool Accept
+    {
+        get => _value;
+        set
+        {
+            if (_value == value) return;
+            _value = value;
+            AcceptChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public EventCallback<bool> AcceptChanged { get; set; }
+
+}

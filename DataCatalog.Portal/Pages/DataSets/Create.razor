@@ -1,0 +1,228 @@
+﻿@page "/datasets/create"
+@attribute [Authorize(Roles = Roles.SuperAdmin + "," + Roles.Admin + "," + Roles.Writer)]
+
+<div style="margin-bottom:2em">
+    <RadzenLink Path="@Config.Value.PortalUri" Text="Portaal" target="_self" />/<RadzenLink Path="/" Text="Data catalog" target="_self" />/ Dataset aanmaken
+</div>
+
+<h3>Dataset aanmaken</h3>
+
+<div style="text-align: right; width:100%">
+    <RadzenLink Path="/datasets" Text="Terug naar datasets" Style="margin: 0 1rem 1rem 0" />
+</div>
+
+<h5 style="margin-top:2rem">Dataset</h5>
+<RadzenTemplateForm Data="@dataSet" Submit="(LinkedDataSet linkedDataSet) => Submit(linkedDataSet)" Context="linkedDataSet">
+    <FormGeneralDataSet isNewDataSet="true"
+                        isEdit="true"
+                        dataSet="@dataSet"
+                        contactPoint="@contactPoint"
+                        publisher="@publisher"
+                        creator="@creator"
+                        keywordsList="@keywordsList"
+                        themesList="@themesList"
+                        keywords="@keywords"
+                        themes="@themes" />
+
+    <h5 style="margin-top:2rem">Rollen</h5>
+    <div class="row" style="display:flex; justify-content: space-between">
+        <div class="m-3" style=" display: flex; align-items:center">
+            <RadzenLabel Text="Rollen toevoegen" Style="margin-right:1rem; width:100%"/>
+            <RadzenDropDown Name="AddRoles"
+                            AllowClear="true"
+                            AllowFiltering="true"
+                            @bind-Value=@selectedRoles
+                            Multiple="true"
+                            Data=@roles
+                            Style="width:100%" />
+            <RadzenRequiredValidator Component="AddRoles" Text="Minimaal 1 rol is verplicht" />
+        </div>
+    </div>
+    <h5 style="margin-top:2rem">Distributie</h5>
+    <div>
+        <DescriptionLabel TItem="Distribution" aspfor="@nameof(Distribution)"></DescriptionLabel>
+    </div>
+    <RadzenButton Icon="add" Style="margin-bottom:10px" Text="Distribution toevoegen" Click="@InsertRow" />
+    <RadzenDataGrid Data="@distributions"
+                    @ref="distributionGrid"
+                    AllowSorting="true"
+                    AllowFiltering="false"
+                    AllowPaging="true"
+                    PageSizeOptions="@distributionPageSizeOptions"
+                    TItem="Distribution"
+                    ColumnWidth="200px"
+                    EditMode="DataGridEditMode.Single"
+                    RowCreate="@OnCreateDistributionRow">
+
+        <Columns>
+            <RadzenDataGridColumn TItem="Distribution" Property="Title" Title="Titel">
+                <EditTemplate Context="distribution">
+                    <RadzenTextBox Style="width:100%" @bind-Value="@distribution.Title" />
+                </EditTemplate>
+                <FooterTemplate>
+                    <FooterCount PageSize="distributionPageSize" Count="distributionCount" Grid="distributionGrid" TItem="Distribution" />
+                </FooterTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Distribution" Property="Description" Title="Omschrijving">
+                <EditTemplate Context="distribution">
+                    <RadzenTextBox Style="width:100%" @bind-Value="distribution.Description" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Distribution" Property="AccessURL" Title="URL">
+                <EditTemplate Context="distribution">
+                    <RadzenTextBox Style="width:100%" @bind-Value="distribution.AccessURL" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Distribution" Property="Format" Title="Format">
+                <EditTemplate Context="distribution">
+                    <RadzenTextBox Style="width:100%" @bind-Value="distribution.Format" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="Distribution" Property="MediaType" Title="Media type">
+                <EditTemplate Context="distribution">
+                    <RadzenTextBox Style="width:100%" @bind-Value="distribution.MediaType" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Distribution" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100%">
+                <EditTemplate Context="distribution">
+                    @if (createMode)
+                    {
+                        <RadzenButton Icon="check" Size="ButtonSize.Medium" Click="@((args) => SaveRow(distribution))" />
+                        <RadzenButton Icon="cancel" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(distribution))" />
+                    }
+                </EditTemplate>
+                <Template Context="distribution">
+                    <RadzenButton Icon="delete" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Warning" Click="@(args => RemoveDistribution(distribution))" @onclick:stopPropagation="true" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+    <div style="text-align: left; width: 100%; margin-top: 2rem; margin-bottom: 2rem">
+        <AcceptPrivacyStatement @bind-Accept="@acceptPrivacyStatement" />
+        <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Aanmaken" />
+    </div>
+</RadzenTemplateForm>
+
+
+
+
+@code {
+    [Inject]
+    private IDataCatalogServiceClient DataCatalogServiceClient { get; set; }
+    LinkedDataSet dataSet = new LinkedDataSet();
+    Distribution distribution = new Distribution();
+    ContactPoint contactPoint = new ContactPoint();
+    Organization publisher = new Organization();
+    Organization creator = new Organization();
+
+    //distribution grid
+    List<Distribution> distributions = new List<Distribution>();
+    RadzenDataGrid<Distribution> distributionGrid;
+    LoadDataArgs distributionDataArgs;
+    IEnumerable<int> distributionPageSizeOptions = new int[] { 5, 10, 25, 50 };
+    int distributionCount;
+    int distributionPageSize;
+
+    // roles
+    IEnumerable<string> roles;
+    IEnumerable<string> selectedRoles = new List<string>();
+
+    //keywords
+    List<string> keywords = new List<string>();
+    string keywordsList;
+
+    //themes
+    List<string> themes = new List<string>();
+    string themesList;
+    bool createMode = false;
+
+    //privacy statement
+    bool acceptPrivacyStatement;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var roleParameters = new RoleParameters { PageIndex = 0, PageSize = 0 };
+        var result = await DataCatalogServiceClient.GetRolesAsync(roleParameters);
+        roles = result.Select(x => x.Name);
+    }
+
+    private void AddDistribution(Distribution distribution)
+    {
+        distributions.Add(distribution);
+    }
+
+    private async Task Submit(LinkedDataSet dataSet)
+    {
+        try
+        {
+            if (!selectedRoles.Any())
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", "Gelieve minimaal 1 rol te selecteren");
+            }
+            else if (!acceptPrivacyStatement)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Privacy", "Je moet akkoord gaan met het privacy beleid.");
+            }
+            else
+            {
+                dataSet.Roles = selectedRoles.ToList();
+                dataSet.Distribution = distributions;
+                dataSet.Publisher = publisher;
+                dataSet.Creator = creator;
+                dataSet.ContactPoint = contactPoint;
+                dataSet.Keyword = keywords;
+                dataSet.Theme = themes;
+                await DataCatalogServiceClient.PostDataSetAsync(dataSet);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Succes", Detail = "Dataset succesvol toegevoegd." });
+                NavigationManager.NavigateTo("/datasets");
+            }
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Oeps! Er is iets fout gegaan." : ex.Message;
+            NotificationService.Notify(NotificationSeverity.Error, "Error", errorMessage);
+        }
+    }
+
+    void InsertRow()
+    {
+        createMode = true;
+        distributions.Add(new Distribution { });
+        distributionGrid.InsertRow(new Distribution());
+    }
+
+    void SaveRow(Distribution distribution)
+    {
+        createMode = false;
+        distributionGrid.UpdateRow(distribution);
+    }
+
+    void RemoveDistribution(Distribution distribution)
+    {
+        RemoveEmptyDistributions(distributions);
+        distributions.Remove(distribution);
+        distributionGrid.Reload();
+    }
+
+    void CancelEdit(Distribution distribution)
+    {
+        distributionGrid.CancelEditRow(distribution);
+    }
+
+    void OnCreateDistributionRow(Distribution distribution)
+    {
+        RemoveEmptyDistributions(distributions);
+        distributions.Add(distribution);
+    }
+
+    void RemoveEmptyDistributions(List<Distribution> distributions)
+    {
+        distributions.RemoveAll(x => x.AccessURL == null &&
+                                                        x.Description == null &&
+                                                        x.Format == null &&
+                                                        x.MediaType == null &&
+                                                        x.Title == null &&
+                                                        x.Type == "dcat:Distribution");
+    }
+}

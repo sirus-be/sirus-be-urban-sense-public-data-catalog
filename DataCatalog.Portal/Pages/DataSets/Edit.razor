@@ -1,0 +1,410 @@
+﻿@page "/datasets/edit"
+@page "/datasets/edit/{Identifier}"
+@attribute [Authorize(Roles = Roles.SuperAdmin + "," + Roles.Admin + "," + Roles.Writer)]
+
+<div style="margin-bottom:2em">
+    <RadzenLink Path="@Config.Value.PortalUri" Text="Portaal" target="_self" />/<RadzenLink Path="/" Text="Data catalog" target="_self" />/ Dataset @Identifier aanpassen
+</div>
+
+<h3>Dataset aanpassen</h3>
+<h4>Naam: <strong>@Identifier</strong></h4>
+<div style="text-align: right; width:100%">
+    <RadzenLink Path="/datasets" Text="Terug naar datasets" Style="margin: 0 1rem 1rem 0" />
+</div>
+<RadzenTemplateForm Data="@linkedDataSet" Submit="(LinkedDataSet linkedDataSet) => Submit(linkedDataSet)" Context="linkedDataSet">
+    <FormGeneralDataSet isNewDataSet="false"
+                        isEdit="true"
+                        dataSet="@dataSet"
+                        contactPoint="@contactPoint"
+                        publisher="@publisher"
+                        creator="@creator"
+                        keywordsList="@keywordsList"
+                        themesList="@themesList"
+                        keywords="@keywords"
+                        themes="@themes" />
+    <div style="text-align:left; width:100%">
+        <AcceptPrivacyStatement @bind-Accept="@acceptPrivacyStatement"/>
+        <RadzenButton ButtonType="ButtonType.Submit" Icon="save" Text="Opslaan" Style="margin:0.25rem" />
+    </div>
+</RadzenTemplateForm>
+
+<h5 style="margin-top:2rem">Distributie</h5>
+<RadzenButton Icon="add" Style="margin-bottom:10px" Text="Distribution toevoegen" Click="@InsertRow" />
+<RadzenDataGrid Data="@distributions"
+                @ref="distributionGrid"
+                Count="@distributionCount"
+                AllowSorting="true"
+                AllowFiltering="false"
+                AllowPaging="true"
+                PageSizeOptions="@distributionPageSizeOptions"
+                TItem="Distribution"
+                ColumnWidth="200px"
+                EditMode="DataGridEditMode.Single">
+    <Columns>
+        <RadzenDataGridColumn TItem="Distribution" Property="Title" Title="Titel">
+            <EditTemplate Context="distribution">
+                <RadzenTextBox Style="width:100%" @bind-Value="@distribution.Title" />
+            </EditTemplate>
+            <FooterTemplate>
+                <FooterCount PageSize="distributionPageSize" Count="distributionCount" Grid="distributionGrid" TItem="Distribution" />
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Distribution" Property="Description" Title="Omschrijving">
+            <EditTemplate Context="distribution">
+                <RadzenTextBox Style="width:100%" @bind-Value="distribution.Description" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Distribution" Property="AccessURL" Title="URL">
+            <EditTemplate Context="distribution">
+                <RadzenTextBox Style="width:100%" @bind-Value="distribution.AccessURL" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Distribution" Property="Format" Title="Format">
+            <EditTemplate Context="distribution">
+                <RadzenTextBox Style="width:100%" @bind-Value="distribution.Format" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Distribution" Property="MediaType" Title="Media type">
+            <EditTemplate Context="distribution">
+                <RadzenTextBox Style="width:100%" @bind-Value="distribution.MediaType" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Distribution" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="100px">
+            <Template Context="distribution">
+                <RadzenButton Icon="edit" Size="ButtonSize.Medium" Click="@(args => EditRow(distribution))" @onclick:stopPropagation="true" />
+            </Template>
+            <EditTemplate Context="distribution">
+                <RadzenButton Icon="save" Size="ButtonSize.Medium" Click="@((args) => SaveRow(distribution))" />
+                <RadzenButton Icon="cancel" Size="ButtonSize.Medium" ButtonStyle="ButtonStyle.Secondary" Click="@((args) => CancelEdit(distribution))" />
+            </EditTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Distribution" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="70px">
+            <Template Context="distribution">
+                <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="delete" Size="ButtonSize.Medium" Click="@(args => DeleteDistributionConfirmation(distribution))" @onclick:stopPropagation="true" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+<h5 style="margin-top:2rem">Rollen</h5>
+<div class="row" style="display:flex; justify-content: space-between">
+    <div class="m-3" style=" display: flex; align-items:center">
+        <RadzenLabel Text="Rol toevoegen:" Style="margin-right:1rem; width:100%" />
+        <RadzenDropDown Name="RoleAssignment"
+                        AllowClear="true"
+                        TValue="string"
+                        Style="width:100%"
+                        LoadData=@LoadRoleCandidates
+                        AllowFiltering="true"
+                        Count="@rolesListCount"
+                        Data="@rolesList"
+                        Change="(args => AddRoleConfirmation(args))" />
+    </div>
+</div>
+<RadzenDataGrid Data="@roles"
+                @ref="rolesGrid"
+                Count="@rolesCount"
+                AllowSorting="true"
+                AllowFiltering="false"
+                AllowPaging="true"
+                LoadData="LoadRolesData"
+                PageSizeOptions="@rolesPageSizeOptions"
+                TItem="Role"
+                ColumnWidth="200px">
+    <Columns>
+        <RadzenDataGridColumn TItem="Role" Property="Name" Title="Naam">
+            <FooterTemplate>
+                <FooterCount Grid="rolesGrid" Count="rolesCount" PageSize="rolesPageSize" TItem="Role" />
+            </FooterTemplate>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="Role" Property="Description" Title="Omschrijving" />
+        <RadzenDataGridColumn TItem="Role" Title="Actie" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="35px">
+            <Template Context="role">
+                <RadzenButton ButtonStyle="ButtonStyle.Warning" Icon="delete" Size="ButtonSize.Medium" Click="@(args => DeleteRoleConfirmation(role))" @onclick:stopPropagation="true" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+        [Inject]
+        private IDataCatalogServiceClient DataCatalogServiceClient { get; set; }
+        [Parameter]
+        public string Identifier { get; set; }
+
+        LinkedDataSet linkedDataSet = new LinkedDataSet();
+        LinkedDataSet dataSet = new LinkedDataSet();
+
+        Organization publisher = new Organization();
+        ContactPoint contactPoint = new ContactPoint();
+        Organization creator = new Organization();
+
+        //distribution grid
+        List<Distribution> distributions;
+        RadzenDataGrid<Distribution> distributionGrid;
+        LoadDataArgs distributionDataArgs;
+        IEnumerable<int> distributionPageSizeOptions = new int[] { 5, 10, 25, 50 };
+        int distributionCount;
+        int distributionPageSize;
+
+        // roles grid
+        List<Role> roles;
+        RadzenDataGrid<Role> rolesGrid;
+        LoadDataArgs roleDataArgs;
+        IEnumerable<int> rolesPageSizeOptions = new int[] { 5, 10, 25, 50 };
+        int rolesCount;
+        int rolesPageSize;
+
+        //roles dropdown
+        RadzenDropDownDataGrid<string> dropDownGrid;
+        IEnumerable<string> rolesList { get; set; }
+        int rolesListCount;
+        List<string> dataSetRoles { get; set; }
+
+        //keywords
+        List<string> keywords = new List<string>();
+        string keywordsList;
+
+        //themes
+        List<string> themes = new List<string>();
+        string themesList;
+
+        //privacy statement
+        bool acceptPrivacyStatement;
+
+    protected override async Task OnInitializedAsync()
+    {
+        linkedDataSet = await DataCatalogServiceClient.GetDataSetAsync(Identifier);
+        distributions = linkedDataSet.Distribution ?? new List<Distribution>();
+        dataSet = linkedDataSet;
+        publisher = linkedDataSet.Publisher ?? new Organization();
+        creator = linkedDataSet.Creator ?? new Organization();
+        contactPoint = linkedDataSet.ContactPoint ?? new ContactPoint();
+        keywords = linkedDataSet.Keyword ?? new List<string>();
+        themes = linkedDataSet.Theme ?? new List<string>();
+        distributionCount = distributions.Count();
+        dataSetRoles = linkedDataSet.Roles ?? new List<string>();
+    }
+
+    async Task LoadRolesData(LoadDataArgs args)
+    {
+        try
+        {
+            var roleParameters = new RoleParameters
+            {
+                PageIndex = rolesGrid.CurrentPage,
+                PageSize = args.Top.Value,
+                Sorting = args.OrderBy ?? string.Empty,
+                Search = args.Filter
+            };
+            var query = await DataCatalogServiceClient.GetDataSetRolesAsync(Identifier, roleParameters);
+            roles = query.Items.ToList();
+            rolesCount = query.Count;
+            rolesPageSize = args.Top.Value;
+        }
+        catch (Exception ex)
+        {
+            roles = new List<Role>();
+        }
+    }
+
+    async Task LoadRoleCandidates(LoadDataArgs args)
+    {
+        var parameters = new RoleParameters
+        {
+            PageIndex = 0,
+            PageSize = 0,
+            Sorting = args.OrderBy ?? string.Empty,
+            Search = args.Filter
+        };
+        var roles = await DataCatalogServiceClient.GetRolesAsync(parameters);
+        var factTypeRoles = await DataCatalogServiceClient.GetDataSetRolesAsync(Identifier, parameters);
+        var rolesNames = roles.Items.Select(x => x.Name);
+        var facTypeRolesNames = factTypeRoles.Items.Select(x => x.Name);
+        var diff = rolesNames.Except(facTypeRolesNames);
+
+        var query = diff.AsQueryable();
+
+        if (args.Skip != null)
+        {
+            query = query.Skip(args.Skip.Value);
+        }
+        if (args.Top != null)
+        {
+            query = query.Take(args.Top.Value);
+        }
+        rolesListCount = roles.Count();
+        rolesList = query;
+    }
+
+    async Task Submit(LinkedDataSet linkedDataSet)
+    {
+        try
+        {
+            if (!acceptPrivacyStatement)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Privacy", "Je moet akkoord gaan met het privacy beleid.");
+            }
+            else
+            {
+                linkedDataSet.Publisher = publisher;
+                linkedDataSet.Creator = creator;
+                linkedDataSet.ContactPoint = contactPoint;
+                linkedDataSet.Keyword = keywords;
+                linkedDataSet.Theme = themes;
+                await DataCatalogServiceClient.PutDataSetAsync(linkedDataSet);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Succes", Detail = "Data set succesvol aangepast." });
+                NavigationManager.NavigateTo("/datasets");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Oeps! Er is iets fout gegaan.");
+        }
+    }
+
+    private async Task DeleteRoleConfirmation(Role role)
+    {
+        var roleName = role.Name;
+        await DialogService.OpenAsync("Bevistigen", deleteDialog =>
+    @<div style="text-align:center;">
+        <p>Bent u zeker om rol <strong>@roleName</strong> van dataset <strong>@Identifier</strong> te verwijderen ?</p>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenButton Text="Ok" Click="() =>RemoveRoleFromDataSet(deleteDialog, role)" Style="margin-bottom: 10px; width: 150px" />
+                <RadzenButton Text="Cancel" Click="() => deleteDialog.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+            </div>
+        </div>
+    </div>
+    );
+    }
+
+    private async Task RemoveRoleFromDataSet(DialogService dialog, Role role)
+    {
+        dialog.Close(false);
+        if (dataSetRoles.Count == 1)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Error", Detail = "Een data set moet ten minste een rol hebben." });
+        }
+        else
+        {
+            try
+            {
+                dataSetRoles.Remove(role.Name);
+                linkedDataSet.Roles = dataSetRoles;
+                var result = await DataCatalogServiceClient.PutDataSetAsync(linkedDataSet);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Succes", Detail = "Rol werd succesvol verwijderd van data set." });
+                await rolesGrid.Reload();
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", "Oeps! Er is iets fout gegaan.");
+            }
+        }
+        dialog.Dispose();
+    }
+
+    private async Task DeleteDistributionConfirmation(Distribution distribution)
+    {
+        await DialogService.OpenAsync("Bevistigen", deleteDialog =>
+    @<div style="text-align:center;">
+        <p>Bent u zeker om distribution <strong>@distribution.Title</strong> van data set <strong>@Identifier</strong> te verwijderen ?</p>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenButton Text="Ok" Click="() =>RemoveDistributionFromDataSet(deleteDialog, distribution)" Style="margin-bottom: 10px; width: 150px" />
+                <RadzenButton Text="Cancel" Click="() => deleteDialog.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+            </div>
+        </div>
+    </div>
+    );
+    }
+
+    private async Task RemoveDistributionFromDataSet(DialogService dialog, Distribution distribution)
+    {
+        dialog.Close(false);
+        if (distributions.Count == 1)
+        {
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Warning, Summary = "Error", Detail = "Een data set moet ten minste een distribution hebben." });
+        }
+        else
+        {
+            try
+            {
+                distributions.Remove(distribution);
+                linkedDataSet.Distribution = distributions;
+                await DataCatalogServiceClient.PutDataSetAsync(linkedDataSet);
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Succes", Detail = "Distribtion werd succesvol verwijderd van data set." });
+                await distributionGrid.Reload();
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", "Oeps! Er is iets fout gegaan.");
+            }
+        }
+    }
+
+    private async Task AddRoleConfirmation(object value)
+    {
+        DialogService.Open("Bevestigen", confirmationDialog =>
+    @<div style="text-align:center;">
+        <p>Bent u zeker om rol <strong>@value</strong> aan dataset <strong>@Identifier</strong> toe te voegen ?</p>
+        <div class="row">
+            <div class="col-md-12">
+                <RadzenButton Text="Ok" Click="() => AddRoleToDataSet(confirmationDialog, value)" Style="margin-bottom: 10px; width: 150px" />
+                <RadzenButton Text="Cancel" Click="() => confirmationDialog.Close(false)" ButtonStyle="ButtonStyle.Secondary" Style="margin-bottom: 10px; width: 150px" />
+            </div>
+        </div>
+    </div>
+    );
+    }
+
+    private async Task AddRoleToDataSet(DialogService dialog, object value)
+    {
+        dialog.Close(false);
+        try
+        {
+            dataSetRoles.Add(value.ToString());
+            linkedDataSet.Roles = dataSetRoles;
+            await DataCatalogServiceClient.PutDataSetAsync(linkedDataSet);
+            NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Success, Summary = "Succes", Detail = "Rol succesvol toevoegen aan fact type." });
+            await rolesGrid.Reload();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Oeps! Er is iets fout gegaan.");
+        }
+        dialog.Dispose();
+    }
+
+    void EditRow(Distribution distribution)
+    {
+        distributionGrid.EditRow(distribution);
+    }
+
+    private async Task SaveRow(Distribution distribution)
+    {
+        try
+        {
+            distributionGrid.UpdateRow(distribution);
+            distributions.Add(distribution);
+            linkedDataSet.Distribution = distributions;
+            await DataCatalogServiceClient.PutDataSetAsync(linkedDataSet);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Oeps! Er is iets fout gegaan.");
+        }
+    }
+
+    void CancelEdit(Distribution distribution)
+    {
+        distributionGrid.CancelEditRow(distribution);
+    }
+
+    void InsertRow()
+    {
+        distributionGrid.InsertRow(new Distribution());
+    }
+
+}
